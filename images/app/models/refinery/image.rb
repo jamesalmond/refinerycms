@@ -1,12 +1,16 @@
+require 'dragonfly'
+
 module Refinery
   class Image < Refinery::Core::BaseModel
+    ::Refinery::Images::Dragonfly.setup!
+
     include Images::Validators
 
     image_accessor :image
 
     validates :image, :presence  => true
     validates_with ImageSizeValidator
-    validates_property :mime_type, :of => :image, :in => %w(image/jpeg image/png image/gif image/tiff),
+    validates_property :mime_type, :of => :image, :in => ::Refinery::Images.whitelisted_mime_types,
                        :message => :incorrect_format
 
     # Docs for acts_as_indexed http://github.com/dougal/acts_as_indexed
@@ -50,7 +54,7 @@ module Refinery
       geometry = geometry.to_s
       width = original_width = self.image_width.to_f
       height = original_height = self.image_height.to_f
-      geometry_width, geometry_height = geometry.to_s.split(%r{\#{1,2}|\+|>|!|x}im)[0..1].map(&:to_f)
+      geometry_width, geometry_height = geometry.split(%r{\#{1,2}|\+|>|!|x}im)[0..1].map(&:to_f)
       if (original_width * original_height > 0) && geometry =~ ::Dragonfly::ImageMagick::Processor::THUMB_GEOMETRY
         if geometry =~ ::Dragonfly::ImageMagick::Processor::RESIZE_GEOMETRY
           if geometry !~ %r{\d+x\d+>} || (geometry =~ %r{\d+x\d+>} && (width > geometry_width.to_f || height > geometry_height.to_f))

@@ -136,6 +136,18 @@ module Refinery
 
           Refinery::Page.count.should == 1
         end
+
+        it "includes menu title field" do
+          visit refinery.new_admin_page_path
+
+          fill_in "Title", :with => "My first page"
+          fill_in "Menu title", :with => "The first page"
+
+          click_button "Save"
+
+          page.should have_content("'My first page' was successfully added.")
+          page.body.should =~ %r{/pages/the-first-page}
+        end
       end
 
       describe "edit/update" do
@@ -471,6 +483,26 @@ module Refinery
               # we should only have the home page in the menu
               page.should have_css('li', :count => 1)
             end
+          end
+        end
+      end
+
+      describe "new page part", :js => true do
+        before do
+          Refinery::Pages.stub(:new_page_parts).and_return(true)
+        end
+
+        it "adds new page part" do
+          visit refinery.new_admin_page_path
+          click_link "add_page_part"
+
+          within "#new_page_part_dialog" do
+            fill_in "new_page_part_title", :with => "testy"
+            click_button "Save"
+          end
+
+          within "#page_parts" do
+            page.should have_content("testy")
           end
         end
       end

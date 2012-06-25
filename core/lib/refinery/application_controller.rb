@@ -65,8 +65,15 @@ module Refinery
 
     # use a different model for the meta information.
     def present(model)
-      presenter = (Object.const_get("#{model.class}Presenter") rescue ::Refinery::BasePresenter)
-      @meta = presenter.new(model)
+      @meta = presenter_for(model).new(model)
+    end
+
+    def presenter_for(model, default=BasePresenter)
+      return default if model.nil?
+
+      "#{model.class.name}Presenter".constantize
+    rescue NameError
+      default
     end
 
     def refinery_user_required?

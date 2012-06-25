@@ -173,29 +173,33 @@ submit_and_continue = function(e, redirect_to) {
   $('.fieldWithErrors').removeClass('fieldWithErrors').addClass('field');
   $('#flash_container .errorExplanation').remove();
 
-  $.post($('#continue_editing').get(0).form.action, $($('#continue_editing').get(0).form).serialize(), function(data) {
-    if (($flash_container = $('#flash_container')).length > 0) {
-      $flash_container.html(data);
+  $.post(
+    $('#continue_editing').get(0).form.action
+    , $($('#continue_editing').get(0).form).serialize()
+    , function(data) {
+      if (($flash_container = $('#flash_container')).length > 0) {
+        $flash_container.html(data);
 
-      $('#flash').css({'width': 'auto', 'visibility': null}).fadeIn(550);
+        $('#flash').css({'width': 'auto', 'visibility': null}).fadeIn(550);
 
-      $('.errorExplanation').not($('#flash_container .errorExplanation')).remove();
+        $('.errorExplanation').not($('#flash_container .errorExplanation')).remove();
 
-      if ((error_fields = $('#fieldsWithErrors').val()) != null) {
-        $.each(error_fields.split(','), function() {
-          $("#" + this).wrap("<div class='fieldWithErrors' />");
-        });
-      } else if (redirect_to) {
-        window.location = redirect_to;
+        if ((error_fields = $('#fieldsWithErrors').val()) != null) {
+          $.each(error_fields.split(','), function() {
+            $("#" + this).wrap("<div class='fieldWithErrors' />");
+          });
+        } else if (redirect_to) {
+          window.location = redirect_to;
+        }
+
+        $('.fieldWithErrors:first :input:first').focus();
+
+        $('#continue_editing').val(false);
+
+        init_flash_messages();
       }
-
-      $('.fieldWithErrors:first :input:first').focus();
-
-      $('#continue_editing').val(false);
-
-      init_flash_messages();
-    }
-  });
+    }, 'html'
+  );
 
   e.preventDefault();
 };
@@ -398,13 +402,14 @@ var link_dialog = {
   },
 
   init_resources_submit: function(){
+    <% absolute_page_links = defined?(Refinery::Pages) && Refinery::Pages.absolute_page_links %>
     $('#existing_resource_area .form-actions-dialog #submit_button').click(function(e){
       e.preventDefault();
       if((resource_selected = $('#existing_resource_area_content ul li.linked a')).length > 0) {
         resourceUrl = parseURL(resource_selected.attr('href'));
-        relevant_href = <%= Refinery::Pages.absolute_page_links ? "resource_selected.attr('href')" : "resourceUrl.pathname" %>;
+        relevant_href = <%= absolute_page_links ? "resource_selected.attr('href')" : "resourceUrl.pathname" %>;
 
-        <% unless Refinery::Pages.absolute_page_links %>
+        <% unless absolute_page_links %>
         // Add any alternate resource stores that need a absolute URL in the regex below
         if(resourceUrl.hostname.match(/s3.amazonaws.com/)) {
           relevant_href = resourceUrl.protocol + '//' + resourceUrl.host + relevant_href;
@@ -455,7 +460,7 @@ var link_dialog = {
 
       var link = $(this).children('a.page_link').get(0);
       var port = (window.location.port.length > 0 ? (":" + window.location.port) : "");
-      var url = link.href<%= %q{.replace(window.location.protocol + "//" + window.location.hostname + port, "")} unless Refinery::Pages.absolute_page_links %>;
+      var url = link.href<%= %q{.replace(window.location.protocol + "//" + window.location.hostname + port, "")} unless defined?(Refinery::Pages) && Refinery::Pages.absolute_page_links %>;
 
       link_dialog.update_parent(url, link.rel.replace(/\ ?<em>.+?<\/em>/, ''));
     });
@@ -608,7 +613,7 @@ var page_options = {
               page_options.tabs.find('> ul li a').corner('top 5px');
 
               $('#new_page_part_dialog').dialog('close');
-            }
+            }, 'html'
           );
         }else{
           alert("A content section with that title already exists, please choose another.");

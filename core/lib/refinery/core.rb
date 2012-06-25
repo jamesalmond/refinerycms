@@ -1,6 +1,5 @@
 require 'rails/all'
 require 'rbconfig'
-require 'acts_as_indexed'
 require 'truncate_html'
 require 'will_paginate'
 
@@ -158,12 +157,12 @@ module Refinery
       end
     end
 
-    private
-      def validate_extension!(const)
-        unless const.respond_to?(:root) && const.root.is_a?(Pathname)
-          raise InvalidEngineError, "Engine must define a root accessor that returns a pathname to its root"
-        end
+  private
+    def validate_extension!(const)
+      unless const.respond_to?(:root) && const.root.is_a?(Pathname)
+        raise InvalidEngineError, "Engine must define a root accessor that returns a pathname to its root"
       end
+    end
   end
 
   module Core

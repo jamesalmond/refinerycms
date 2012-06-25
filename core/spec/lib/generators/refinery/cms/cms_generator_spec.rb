@@ -9,7 +9,7 @@ module Refinery
 
     before(:each) do
       prepare_destination
-      run_generator
+      run_generator %w[--skip-db --skip-migrations]
     end
 
     specify do
@@ -37,9 +37,6 @@ module Refinery
           file "database.yml.mysql"
           file "database.yml.postgresql"
           file "database.yml.sqlite3"
-          directory "initializers" do
-            file "devise.rb"
-          end
         end
       }
     end

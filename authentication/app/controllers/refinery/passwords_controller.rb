@@ -1,5 +1,6 @@
 module Refinery
   class PasswordsController < Devise::PasswordsController
+    helper Refinery::Core::Engine.helpers
     layout 'refinery/layouts/login'
 
     before_filter :store_password_reset_return_to, :only => [:update]
@@ -38,11 +39,10 @@ module Refinery
         redirect_to refinery.new_refinery_user_session_path,
                     :notice => t('email_reset_sent', :scope => 'refinery.users.forgot')
       else
-        @refinery_user = User.new(params[:refinery_user])
-        flash.now[:error] = if @refinery_user.email.blank?
+        flash.now[:error] = if (email = params[:refinery_user][:email]).blank?
           t('blank_email', :scope => 'refinery.users.forgot')
         else
-          t('email_not_associated_with_account_html', :email => @refinery_user.email, :scope => 'refinery.users.forgot')
+          t('email_not_associated_with_account_html', :email => ERB::Util.html_escape(email), :scope => 'refinery.users.forgot').html_safe
         end
         render :new
       end
