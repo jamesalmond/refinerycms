@@ -26,7 +26,8 @@ module Refinery
     # <%= image_fu @model.image, '200x200' %> or with no thumbnail: <%= image_fu @model.image %>
     def image_fu(image, geometry = nil, options={})
       if image.present?
-        dimensions = (image.thumbnail_dimensions(geometry) rescue {})
+        add_dimensions = options[:add_dimensions] || false
+        dimensions = add_dimensions ?  (image.thumbnail_dimensions(geometry) rescue {}) : {}
 
         image_tag(image.thumbnail(geometry).url, {
           :alt => image.respond_to?(:title) ? image.title : image.image_name,
